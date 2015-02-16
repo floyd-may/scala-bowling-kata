@@ -1,4 +1,4 @@
-class Game(pRolls: Seq[Int]) {
+class Game(pRolls: Seq[Frame]) {
   val rolls = pRolls;
 
   def roll(pins: Int) : Game = {
@@ -7,5 +7,9 @@ class Game(pRolls: Seq[Int]) {
 
   def this() = this(Seq[Int]());
 
-  def score = 0;
+  def score = rolls.sum;
 }
+
+abstract class Frame;
+case class OpenFrame(roll: Int) extends Frame;
+case class ClosedFrame(firstRoll: Int, secondRoll: Int) extends Frame;
