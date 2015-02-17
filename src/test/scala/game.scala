@@ -2,41 +2,57 @@ import org.specs2.mutable._
 
 class GameSpec extends Specification {
   "Newly-created Game" should {
-    "have no rolls" in {
-      new Game().rolls mustEqual Seq[Frame]();
+    "have no closed frames" in {
+      new Game().closedFrames mustEqual Seq[Frame]();
     }
-
-    "have score of zero" in {
-      new Game().score mustEqual 0;
-    }
-  }
-
-  "Gutter Game" should {
-    val gutterGame = Iterator
-      .continually(0)
-      .take(20)
-      .foldLeft(new Game()){ (game, roll) => game.roll(roll) };
-
-    "have twenty rolls of zero" in {
-      gutterGame.rolls mustEqual (Iterator.continually(0).take(20) toSeq);
-    }
-
-    "have score of zero" in {
-      gutterGame.score mustEqual 0;
+    "have an empty open frame" in {
+      new Game().openFrame mustEqual EmptyFrame();
     }
   }
 
-  "All ones" should {
-    val rolls = Iterator
-      .continually(1)
-      .take(20);
-    val game = new Game(rolls toSeq)
-
-    "have score of 20" in {
-      game.score mustEqual 20;
+  "Single-roll Game" should {
+    "have openFrame with first roll" in {
+      new Game().roll(4).openFrame mustEqual OpenFrame(4);
     }
   }
 
-  
+  "Two rolls" should {
+    val game = new Game().roll(4).roll(3);
 
+    "have a closed frame" in {
+      game.closedFrames mustEqual Seq(ClosedFrame(4, 3));
+    }
+    "have an empty open frame" in {
+      game.openFrame mustEqual EmptyFrame();
+    }
+  }
+
+  "Seventeen rolls of 3" should {
+    val rolls = Iterator.continually(3).take(17);
+    val game = rolls.foldLeft(new Game())((g, p) => g.roll(p));
+    val expectedFrames = Iterator.continually(ClosedFrame(3, 3)).take(8).toSeq
+    "have eight closed frames" in {
+      game.closedFrames mustEqual expectedFrames;
+    }
+    "have an open frame" in {
+      game.openFrame mustEqual OpenFrame(3);
+    }
+  }
+
+  "Spare with adjacent rolls that add to 10" should {
+    val rolls = Seq(2, 4, 6, 3, 8, 2);
+    val game = rolls.foldLeft(new Game())((g, p) => g.roll(p));
+    val expectedFrames = Seq(
+      ClosedFrame(2, 4),
+      ClosedFrame(6, 3),
+      SpareFrame(8, 2)
+    );
+    "have one SpareFrame" in {
+      game.closedFrames mustEqual expectedFrames;
+    }
+    "have an empty open frame" in {
+      game.openFrame mustEqual EmptyFrame();
+    }
+  }
 }
+
