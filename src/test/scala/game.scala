@@ -54,5 +54,29 @@ class GameSpec extends Specification {
       game.openFrame mustEqual EmptyFrame();
     }
   }
+
+  "Rolls that include strikes" should {
+    val rolls = Seq(2, 4, 6, 3, 10, 2);
+    val game = rolls.foldLeft(new Game())((g, p) => g.roll(p));
+    val expectedFrames = Seq(
+      ClosedFrame(2, 4),
+      ClosedFrame(6, 3),
+      StrikeFrame()
+    );
+    "have one StrikeFrame" in {
+      game.closedFrames mustEqual expectedFrames;
+    }
+    "have open frame with roll of 2" in {
+      game.openFrame mustEqual OpenFrame(2);
+    }
+  }
+
+  "Final frame with spare" should {
+    val rolls = Iterator.continually(0).take(18) ++ Seq(5, 5, 0);
+    val game = rolls.foldLeft(new Game())((g, p) => g.roll(p));
+    "have final frame with rolls of 5, 5, 0" in {
+      game.openFrame mustEqual FinalFrame(5, 5, 0);
+    }
+  }
 }
 
